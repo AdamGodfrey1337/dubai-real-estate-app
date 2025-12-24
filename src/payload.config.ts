@@ -11,9 +11,12 @@ import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import { Agents } from './collections/Agents'
 import { Properties } from './collections/Properties'
+import { Leads } from './collections/Leads'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
+// Kanban plugin import (assumes installed as dependency)
+import kanbanBoard from 'payload-kanban-board';
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
@@ -65,7 +68,7 @@ export default buildConfig({
       connectionString: process.env.POSTGRES_URL || '',
     },
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Agents, Properties],
+  collections: [Pages, Posts, Media, Categories, Users, Agents, Properties, Leads],
   cors: [getServerSideURL()].filter(Boolean),
   plugins: [
     ...plugins,
@@ -74,6 +77,24 @@ export default buildConfig({
         media: true,
       },
       token: process.env.BLOB_READ_WRITE_TOKEN || '',
+    }),
+    kanbanBoard({
+      collections: [
+        {
+          slug: 'leads',
+          columnField: 'status',
+          columns: [
+            { label: 'New', value: 'new' },
+            { label: 'Contacted', value: 'contacted' },
+            { label: 'Viewing', value: 'viewing' },
+            { label: 'Negotiating', value: 'negotiating' },
+            { label: 'Closed', value: 'closed' },
+            { label: 'Lost', value: 'lost' },
+          ],
+          cardTitleField: 'fullName',
+          cardDescriptionField: 'message',
+        },
+      ],
     }),
   ],
   globals: [Header, Footer],
